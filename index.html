@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORM + VOID — Architectural Syndicate</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F4F4F4;
+  --ink: #080808;
+  --warm-grey: #7A7A7A;
+  --rust: #6BBF4E;
+  --gold: #8CC63F;
+  --sand: #B4E09A;
+  --dark: #0C0C0C;
+  --mid: #141914;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#080808;color:var(--cream);font-family:'DM Sans',sans-serif;overflow-x:hidden;cursor:none}
+
+/* CUSTOM CURSOR */
+.cursor{position:fixed;width:10px;height:10px;border-radius:50%;background:var(--rust);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s,background .2s;mix-blend-mode:difference}
+.cursor-ring{position:fixed;width:40px;height:40px;border:1px solid rgba(107,191,78,0.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .15s ease}
+body:hover .cursor{opacity:1}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:1000;padding:28px 60px;display:flex;justify-content:space-between;align-items:center;transition:all .4s}
+nav.scrolled{background:rgba(13,12,10,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.04);padding:18px 60px}
+.logo-mark{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:8px;color:var(--cream);text-decoration:none}
+.logo-mark span{color:var(--rust)}
+.nav-links{display:flex;gap:40px;align-items:center}
+.nav-links a{color:rgba(245,240,232,0.55);text-decoration:none;font-size:11px;letter-spacing:3px;text-transform:uppercase;transition:.3s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--rust);transition:.3s}
+.nav-links a:hover{color:var(--cream)}
+.nav-links a:hover::after{width:100%}
+.nav-cta{background:var(--rust);color:var(--cream)!important;padding:12px 28px;font-size:10px!important;letter-spacing:3px;transition:all .3s!important}
+.nav-cta::after{display:none!important}
+.nav-cta:hover{background:#7acc5a!important;transform:translateY(-1px)}
+
+/* PAGE SYSTEM */
+.page{display:none;animation:fadeIn .5s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== HOMEPAGE ===== */
+
+/* HERO */
+.hero{height:100vh;position:relative;display:flex;align-items:flex-end;padding:0 60px 80px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&q=80&w=1800') center/cover no-repeat;filter:brightness(.45) sepia(.2)}
+.hero-grain{position:absolute;inset:0;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,12,10,1) 0%,rgba(13,12,10,.3) 40%,transparent 70%)}
+.hero-content{position:relative;z-index:2;max-width:900px}
+.hero-eyebrow{font-size:10px;letter-spacing:6px;color:var(--rust);text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.hero-eyebrow::before{content:'';width:40px;height:1px;background:var(--rust)}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(64px,9vw,130px);line-height:.92;font-weight:300;margin-bottom:40px;letter-spacing:-2px}
+.hero h1 em{font-style:italic;color:var(--sand)}
+.hero-bottom{display:flex;justify-content:space-between;align-items:flex-end;width:100%}
+.hero-desc{max-width:380px;font-size:14px;color:var(--warm-grey);line-height:1.8}
+.hero-stats{display:flex;gap:60px}
+.stat-item{text-align:center}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--cream);line-height:1;display:block}
+.stat-label{font-size:10px;letter-spacing:3px;color:var(--warm-grey);text-transform:uppercase}
+.scroll-hint{position:absolute;bottom:40px;right:60px;font-size:10px;letter-spacing:4px;color:var(--warm-grey);writing-mode:vertical-rl;display:flex;align-items:center;gap:12px;z-index:2}
+.scroll-hint::after{content:'';width:1px;height:60px;background:linear-gradient(var(--rust),transparent);animation:scrollLine 2s ease-in-out infinite}
+@keyframes scrollLine{0%,100%{opacity:0;transform:scaleY(0)}50%{opacity:1;transform:scaleY(1)}}
+
+/* MARQUEE */
+.marquee-section{padding:28px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);overflow:hidden;background:var(--dark)}
+.marquee-track{display:flex;gap:0;white-space:nowrap;animation:marquee 25s linear infinite}
+.marquee-item{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:8px;color:var(--warm-grey);padding:0 40px;flex-shrink:0}
+.marquee-item span{color:var(--rust);margin:0 20px}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* EDITORIAL INTRO */
+.editorial-intro{padding:140px 60px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;background:var(--cream);color:var(--ink)}
+.editorial-label{font-size:10px;letter-spacing:5px;color:var(--rust);text-transform:uppercase;margin-bottom:24px;display:block}
+.editorial-intro h2{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,60px);font-weight:300;line-height:1.1;margin-bottom:36px}
+.editorial-intro p{font-size:15px;color:#555;line-height:1.9;margin-bottom:20px}
+.text-link{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px;transition:.3s;display:inline-block}
+.text-link:hover{color:var(--gold);border-color:var(--gold)}
+.editorial-visual{position:relative}
+.editorial-img{width:100%;height:560px;object-fit:cover}
+.editorial-badge{position:absolute;top:40px;right:-30px;width:100px;height:100px;background:var(--rust);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;animation:rotate 12s linear infinite}
+.editorial-badge span{font-size:8px;letter-spacing:2px;color:var(--ink)}
+.editorial-badge strong{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--ink)}
+@keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* PROJECTS GRID */
+.projects-section{padding:100px 60px;background:var(--ink)}
+.section-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px}
+.section-header h2{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,5vw,72px);font-weight:300;line-height:1}
+.section-header h2 em{font-style:italic;color:var(--sand)}
+.projects-grid{display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:auto auto;gap:20px}
+.proj-card{position:relative;overflow:hidden;cursor:pointer}
+.proj-card.large{grid-row:span 2;height:700px}
+.proj-card.small{height:340px}
+.proj-card img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.25,.46,.45,.94),filter .5s}
+.proj-card:hover img{transform:scale(1.08);filter:brightness(.6)}
+.proj-card-info{position:absolute;bottom:0;left:0;right:0;padding:40px;background:linear-gradient(transparent,rgba(0,0,0,.85));transform:translateY(20px);opacity:0;transition:all .4s}
+.proj-card:hover .proj-card-info{opacity:1;transform:translateY(0)}
+.proj-type{font-size:9px;letter-spacing:4px;color:var(--rust);text-transform:uppercase;margin-bottom:8px}
+.proj-name{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--cream)}
+.proj-year{font-size:11px;color:var(--warm-grey)}
+.proj-card-always{position:absolute;top:30px;left:30px;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.5);text-transform:uppercase}
+
+/* PHILOSOPHY STRIP — 4 PILLARS */
+.philosophy{padding:0 60px 0;background:var(--mid)}
+.philosophy-top{display:flex;justify-content:space-between;align-items:flex-end;padding:80px 0 60px;border-bottom:1px solid rgba(107,191,78,.12)}
+.philosophy-pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.pillar{padding:60px 44px 70px;border-right:1px solid rgba(107,191,78,.1);position:relative;overflow:hidden;transition:background .4s}
+.pillar:last-child{border-right:none}
+.pillar:hover{background:rgba(107,191,78,.04)}
+.pillar-ghost{font-family:'Bebas Neue',sans-serif;font-size:130px;color:rgba(107,191,78,.06);line-height:1;position:absolute;top:24px;left:24px;pointer-events:none;transition:color .4s}
+.pillar:hover .pillar-ghost{color:rgba(107,191,78,.12)}
+.pillar-inner{position:relative;z-index:2;padding-top:90px}
+.pillar-num{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:5px;color:var(--rust);display:block;margin-bottom:22px}
+.pillar-quote{font-family:'Cormorant Garamond',serif;font-size:clamp(17px,1.6vw,23px);font-weight:300;line-height:1.35;margin-bottom:22px;color:#EFEFEF}
+.pillar-quote em{font-style:italic;color:var(--rust)}
+.pillar-body{font-size:12.5px;color:var(--warm-grey);line-height:1.85}
+.pillar-tag{margin-top:36px;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:rgba(107,191,78,.35);padding-top:18px;border-top:1px solid rgba(107,191,78,.1)}
+
+/* SERVICES GRID */
+.services-section{padding:120px 60px;background:var(--cream);color:var(--ink)}
+.services-section .section-header h2{color:var(--ink)}
+.services-section .section-header h2 em{color:var(--rust)}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#0C0C0C}
+.service-card{background:var(--cream);padding:60px 50px;transition:.3s}
+.service-card:hover{background:var(--ink);color:var(--cream)}
+.service-num{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--rust);line-height:1;margin-bottom:20px;display:block}
+.service-card h4{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin-bottom:16px;transition:.3s}
+.service-card p{font-size:13px;line-height:1.8;color:var(--warm-grey);transition:.3s}
+.service-card:hover p{color:rgba(244,244,244,.55)}
+.service-card:hover .service-num{color:var(--rust)}
+
+/* PROCESS */
+.process-section{padding:140px 60px;background:var(--ink)}
+.process-section h2{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,5vw,70px);font-weight:300;text-align:center;margin-bottom:16px}
+.process-section .sub{text-align:center;font-size:13px;color:var(--warm-grey);margin-bottom:80px;letter-spacing:1px}
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.process-steps::before{content:'';position:absolute;top:30px;left:10%;width:80%;height:1px;background:rgba(255,255,255,.1)}
+.step{padding:0 30px;text-align:center}
+.step-dot{width:60px;height:60px;border-radius:50%;border:1px solid rgba(107,191,78,.4);display:flex;align-items:center;justify-content:center;margin:0 auto 30px;position:relative;background:var(--ink)}
+.step-dot::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--rust);opacity:0;transition:.3s}
+.step:hover .step-dot::before{opacity:1}
+.step-num{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--rust);position:relative;z-index:1}
+.step h4{font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:12px}
+.step p{font-size:12px;color:var(--warm-grey);line-height:1.7}
+
+/* TESTIMONIAL */
+.testimonial-section{padding:140px 60px;background:#0D0C0A;position:relative;overflow:hidden}
+.testimonial-section::before{content:'"';position:absolute;top:-40px;left:40px;font-family:'Cormorant Garamond',serif;font-size:400px;color:rgba(107,191,78,.06);line-height:1}
+.testimonial-inner{max-width:820px;margin:0 auto;text-align:center;position:relative;z-index:2}
+blockquote{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,2.5vw,34px);font-weight:300;font-style:italic;line-height:1.6;color:var(--cream);margin-bottom:50px}
+cite{font-size:10px;letter-spacing:5px;color:var(--rust);text-transform:uppercase}
+
+/* AWARDS */
+.awards-section{padding:100px 60px;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.awards-section .section-header h2{font-size:clamp(36px,4vw,60px)}
+.awards-list{display:grid;grid-template-columns:repeat(4,1fr);gap:40px}
+.award-item{border-top:1px solid rgba(255,255,255,.08);padding-top:30px}
+.award-year{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--rust);display:block;margin-bottom:8px}
+.award-name{font-size:13px;color:var(--cream);margin-bottom:6px}
+.award-org{font-size:11px;color:var(--warm-grey)}
+
+/* CONTACT STRIP */
+.contact-strip{padding:160px 60px;background:var(--cream);color:var(--ink);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.contact-strip h2{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,6vw,90px);font-weight:300;line-height:.95;margin-bottom:30px}
+.contact-strip h2 em{font-style:italic;color:var(--rust)}
+.btn-outline-dark{border:1px solid var(--ink);padding:20px 50px;font-size:10px;letter-spacing:4px;text-transform:uppercase;text-decoration:none;color:var(--ink);transition:.3s;display:inline-block;font-family:'DM Sans',sans-serif}
+.btn-outline-dark:hover{background:var(--rust);color:var(--ink);border-color:var(--rust)}
+.contact-details p{font-size:13px;color:#666;line-height:2.4;margin-bottom:8px}
+.contact-details p strong{color:var(--ink);font-weight:500}
+
+/* FOOTER */
+footer{background:var(--dark);padding:80px 60px 40px;border-top:1px solid rgba(255,255,255,.04)}
+.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:60px;margin-bottom:80px}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:8px;margin-bottom:20px}
+.footer-logo span{color:var(--rust)}
+.footer-tagline{font-size:12px;color:var(--warm-grey);line-height:1.8;max-width:280px}
+.footer-col h5{font-size:9px;letter-spacing:5px;color:var(--warm-grey);text-transform:uppercase;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:12px}
+.footer-col a{display:block;font-size:13px;color:rgba(245,240,232,.5);text-decoration:none;margin-bottom:12px;transition:.3s}
+.footer-col a:hover{color:var(--cream)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:30px;border-top:1px solid rgba(255,255,255,.04)}
+.footer-bottom p{font-size:11px;color:rgba(255,255,255,.2)}
+.footer-social{display:flex;gap:24px}
+.footer-social a{font-size:10px;letter-spacing:3px;color:var(--rust);text-decoration:none;transition:.3s}
+.footer-social a:hover{color:var(--cream)}
+
+/* ===== PROJECTS PAGE ===== */
+.page-hero{height:55vh;display:flex;align-items:flex-end;padding:0 60px 80px;position:relative;overflow:hidden;background:#0D0C0A}
+.page-hero-bg{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1800') center/cover;filter:brightness(.3) sepia(.3);transform-origin:center;animation:slowZoom 12s ease-in-out infinite alternate}
+@keyframes slowZoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+.page-hero-content{position:relative;z-index:2}
+.page-hero-content h1{font-family:'Cormorant Garamond',serif;font-size:clamp(56px,8vw,110px);font-weight:300;line-height:.9;margin-bottom:20px}
+.page-hero-content h1 em{font-style:italic;color:var(--sand)}.page-hero-content p{font-size:13px;color:var(--warm-grey);letter-spacing:1px}
+
+.projects-full{padding:80px 60px;background:var(--ink)}
+.filter-bar{display:flex;gap:8px;margin-bottom:60px;flex-wrap:wrap}
+.filter-btn{padding:10px 24px;font-size:10px;letter-spacing:3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);background:none;color:var(--warm-grey);cursor:pointer;transition:.3s;font-family:'DM Sans',sans-serif}
+.filter-btn.active,.filter-btn:hover{background:var(--rust);color:var(--ink);border-color:var(--rust)}
+
+.proj-masonry{columns:2;gap:20px}
+.proj-masonry-item{break-inside:avoid;margin-bottom:20px;position:relative;overflow:hidden;cursor:pointer}
+.proj-masonry-item img{width:100%;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94)}
+.proj-masonry-item:hover img{transform:scale(1.06)}
+.proj-masonry-info{background:var(--mid);padding:28px 30px}
+.proj-masonry-info .proj-type{font-size:9px;letter-spacing:4px;color:var(--rust);text-transform:uppercase;margin-bottom:6px}
+.proj-masonry-info h3{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;margin-bottom:4px}
+.proj-masonry-info p{font-size:11px;color:var(--warm-grey)}
+
+/* ===== ABOUT PAGE ===== */
+.about-hero{min-height:80vh;background:var(--cream);color:var(--ink);display:flex;align-items:center;padding:140px 60px 100px;position:relative;overflow:hidden}
+.about-hero::before{content:'FORM';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-family:'Bebas Neue',sans-serif;font-size:280px;color:rgba(107,191,78,.06);line-height:1;pointer-events:none}
+.about-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;position:relative;z-index:2}
+.about-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,6vw,88px);font-weight:300;line-height:1;margin-bottom:30px}
+.about-hero h1 em{font-style:italic;color:var(--rust)}
+.about-hero .lead{font-size:16px;line-height:1.9;color:#555;margin-bottom:30px}
+.about-img-stack{position:relative;height:600px}
+.about-img-main{position:absolute;top:0;left:40px;width:75%;height:80%;object-fit:cover}
+.about-img-accent{position:absolute;bottom:0;left:0;width:55%;height:50%;object-fit:cover;border:8px solid var(--cream)}
+
+.team-section{padding:120px 60px;background:var(--ink)}
+.team-section h2{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,5vw,70px);font-weight:300;text-align:center;margin-bottom:16px}
+.team-section .sub{text-align:center;font-size:13px;color:var(--warm-grey);margin-bottom:70px}
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.team-card{position:relative;overflow:hidden}
+.team-card img{width:100%;height:420px;object-fit:cover;filter:grayscale(30%);transition:.5s}
+.team-card:hover img{filter:grayscale(0%);transform:scale(1.04)}
+.team-card-info{padding:24px 0}
+.team-card-name{font-family:'Cormorant Garamond',serif;font-size:24px;margin-bottom:4px}
+.team-card-title{font-size:11px;color:var(--rust);letter-spacing:3px;text-transform:uppercase}
+
+.values-section{padding:120px 60px;background:var(--cream);color:var(--ink);display:grid;grid-template-columns:1fr 2fr;gap:80px}
+.values-label{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,56px);font-weight:300;line-height:1.1}
+.values-label em{font-style:italic;color:var(--rust)}
+.values-list{display:flex;flex-direction:column;gap:0}
+.value-item{padding:30px 0;border-bottom:1px solid rgba(0,0,0,.1);display:flex;gap:30px;align-items:flex-start}
+.value-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--rust);flex-shrink:0;line-height:1}
+.value-item h4{font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:8px}
+.value-item p{font-size:13px;color:#666;line-height:1.8}
+
+/* ===== CONTACT PAGE ===== */
+.contact-page{min-height:100vh;background:var(--cream);color:var(--ink);padding:140px 60px 100px;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:start}
+.contact-page h1{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,6vw,88px);font-weight:300;line-height:.95;margin-bottom:30px}
+.contact-page h1 em{font-style:italic;color:var(--rust)}
+.contact-page .lead{font-size:15px;line-height:1.9;color:#666;margin-bottom:50px}
+.contact-info-block{margin-bottom:40px}
+.contact-info-block h5{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--rust);margin-bottom:16px}
+.contact-info-block p{font-size:15px;color:#444;line-height:1.8}
+
+.contact-form{display:flex;flex-direction:column;gap:0}
+.form-group{margin-bottom:8px}
+.form-group label{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--warm-grey);display:block;margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:18px 0;background:none;border:none;border-bottom:1px solid rgba(0,0,0,.2);font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);outline:none;transition:.3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--rust)}
+.form-group textarea{resize:none;height:120px;margin-top:8px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.btn-submit{margin-top:40px;background:var(--ink);color:var(--cream);padding:22px 60px;border:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:.3s;align-self:flex-start}
+.btn-submit:hover{background:var(--rust);color:var(--ink);transform:translateY(-2px)}
+
+/* ===== MANIFESTO PAGE ===== */
+.manifesto-page{background:var(--ink);padding:140px 60px;max-width:900px;margin:0 auto}
+.manifesto-page .eyebrow{font-size:10px;letter-spacing:6px;color:var(--rust);text-transform:uppercase;margin-bottom:40px;display:block}
+.manifesto-page h1{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,7vw,100px);font-weight:300;line-height:.9;margin-bottom:60px}
+.manifesto-page h1 em{font-style:italic;color:var(--sand)}
+.manifesto-body{font-family:'Cormorant Garamond',serif;font-size:22px;line-height:1.8;color:rgba(245,240,232,.8)}
+.manifesto-body p{margin-bottom:40px}
+.manifesto-body .pullquote{font-size:clamp(28px,3.5vw,46px);line-height:1.3;color:var(--cream);border-left:3px solid var(--rust);padding-left:40px;margin:60px 0;font-style:italic}
+.manifesto-body .accent{color:var(--rust)}
+.manifesto-divider{width:60px;height:2px;background:var(--rust);margin:60px 0}
+
+/* UTILITY */
+.section-label{font-size:9px;letter-spacing:6px;color:var(--rust);text-transform:uppercase;display:flex;align-items:center;gap:16px}
+.section-label::before{content:'';width:30px;height:1px;background:var(--rust)}
+.btn-light{border:1px solid rgba(244,244,244,.3);padding:18px 48px;font-size:10px;letter-spacing:4px;text-transform:uppercase;text-decoration:none;color:var(--cream);transition:.3s;display:inline-block;font-family:'DM Sans',sans-serif}
+.btn-light:hover{background:var(--rust);color:var(--ink);border-color:var(--rust)}
+
+/* HAMBURGER */
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;z-index:1100}
+.hamburger span{display:block;width:24px;height:1.5px;background:var(--cream);transition:.3s}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+/* MOBILE NAV DRAWER */
+.mobile-nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1099;opacity:0;pointer-events:none;transition:opacity .35s}
+.mobile-nav-overlay.open{opacity:1;pointer-events:all}
+.mobile-nav-drawer{position:fixed;top:0;right:-100%;width:min(320px,85vw);height:100%;background:var(--dark);z-index:1100;transition:right .4s cubic-bezier(.25,.46,.45,.94);display:flex;flex-direction:column;padding:0}
+.mobile-nav-drawer.open{right:0}
+.mobile-nav-top{display:flex;justify-content:space-between;align-items:center;padding:28px 32px;border-bottom:1px solid rgba(107,191,78,.1)}
+.mobile-nav-close{background:none;border:none;color:var(--warm-grey);font-size:18px;cursor:pointer;padding:4px}
+.mobile-nav-links{display:flex;flex-direction:column;padding:40px 32px;gap:0;flex:1}
+.mobile-nav-links a{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:rgba(244,244,244,.7);text-decoration:none;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.05);transition:.3s;letter-spacing:-0.5px}
+.mobile-nav-links a:hover{color:var(--cream)}
+.mobile-nav-cta{color:var(--rust)!important;margin-top:16px;border-bottom:none!important}
+.mobile-nav-footer{padding:32px;border-top:1px solid rgba(107,191,78,.1)}
+.mobile-nav-footer p{font-size:11px;color:var(--warm-grey);line-height:2}
+.mobile-nav-footer a{font-size:10px;letter-spacing:3px;color:var(--rust);text-decoration:none}
+
+/* ============================================================
+   MOBILE RESPONSIVE — max-width: 768px
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* Disable custom cursor on touch */
+  body{cursor:auto}
+  .cursor,.cursor-ring{display:none}
+
+  /* NAV */
+  nav{padding:20px 24px}
+  nav.scrolled{padding:16px 24px}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+
+  /* HERO */
+  .hero{padding:0 24px 60px;align-items:flex-end}
+  .hero-eyebrow{font-size:9px;letter-spacing:3px;margin-bottom:16px}
+  .hero h1{font-size:clamp(44px,12vw,72px);margin-bottom:28px}
+  .hero-bottom{flex-direction:column;gap:40px;align-items:flex-start}
+  .hero-desc{max-width:100%}
+  .hero-stats{gap:32px}
+  .stat-num{font-size:38px}
+  .stat-label{font-size:9px}
+  .scroll-hint{display:none}
+  .hero-content > div:first-child{flex-direction:column;gap:14px}
+
+  /* MARQUEE */
+  .marquee-item{font-size:11px;letter-spacing:5px;padding:0 24px}
+
+  /* EDITORIAL INTRO */
+  .editorial-intro{grid-template-columns:1fr;gap:40px;padding:80px 24px}
+  .editorial-visual{display:none}
+
+  /* PROJECTS SECTION */
+  .projects-section{padding:60px 24px}
+  .section-header{flex-direction:column;align-items:flex-start;gap:24px;margin-bottom:40px}
+  .projects-grid{grid-template-columns:1fr;grid-template-rows:auto}
+  .proj-card.large{grid-row:span 1;height:340px}
+  .proj-card.small{height:260px}
+  .proj-card-info{opacity:1;transform:translateY(0)}
+
+  /* PHILOSOPHY PILLARS */
+  .philosophy{padding:0 24px 0}
+  .philosophy-top{padding:60px 0 40px;flex-direction:column;gap:12px;align-items:flex-start}
+  .philosophy-pillars{grid-template-columns:1fr}
+  .pillar{border-right:none;border-bottom:1px solid rgba(107,191,78,.1);padding:40px 0 40px}
+  .pillar:last-child{border-bottom:none}
+  .pillar-ghost{font-size:90px;top:16px;left:0}
+  .pillar-inner{padding-top:64px}
+  .pillar-quote{font-size:20px}
+
+  /* SERVICES */
+  .services-section{padding:60px 24px}
+  .services-grid{grid-template-columns:1fr;gap:2px}
+  .service-card{padding:40px 30px}
+
+  /* PROCESS */
+  .process-section{padding:80px 24px}
+  .process-steps{grid-template-columns:1fr 1fr;gap:40px}
+  .process-steps::before{display:none}
+  .step{padding:0}
+
+  /* TESTIMONIAL */
+  .testimonial-section{padding:80px 24px}
+  .testimonial-section::before{font-size:200px;top:-10px;left:10px}
+
+  /* AWARDS */
+  .awards-section{padding:60px 24px}
+  .awards-list{grid-template-columns:1fr 1fr;gap:24px}
+  .award-year{font-size:30px}
+
+  /* CONTACT STRIP */
+  .contact-strip{grid-template-columns:1fr;padding:80px 24px;gap:40px}
+  .contact-strip h2{font-size:clamp(40px,12vw,64px)}
+
+  /* FOOTER */
+  footer{padding:60px 24px 32px}
+  .footer-top{grid-template-columns:1fr;gap:40px;margin-bottom:40px}
+
+  /* PROJECTS PAGE */
+  .page-hero{padding:0 24px 60px;height:45vh}
+  .page-hero-content h1{font-size:clamp(44px,12vw,72px)}
+  .projects-full{padding:50px 24px}
+  .filter-bar{gap:6px}
+  .filter-btn{padding:8px 16px;font-size:9px;letter-spacing:2px}
+  .proj-masonry{columns:1}
+
+  /* ABOUT PAGE */
+  .about-hero{padding:100px 24px 60px}
+  .about-hero-grid{grid-template-columns:1fr;gap:40px}
+  .about-img-stack{height:320px}
+  .about-img-main{width:85%;left:15%}
+  .about-img-accent{width:60%;left:0}
+  .team-section{padding:60px 24px}
+  .team-grid{grid-template-columns:1fr;gap:24px}
+  .team-card img{height:320px}
+  .values-section{grid-template-columns:1fr;gap:40px;padding:60px 24px}
+  .value-item{gap:20px}
+
+  /* CONTACT PAGE */
+  .contact-page{grid-template-columns:1fr;padding:100px 24px 60px;gap:50px}
+  .contact-page h1{font-size:clamp(44px,12vw,72px)}
+  .form-row{grid-template-columns:1fr}
+  .btn-submit{width:100%;text-align:center;padding:20px}
+
+  /* MANIFESTO PAGE */
+  .manifesto-page{padding:100px 24px 60px}
+  .manifesto-body{font-size:18px}
+  .manifesto-body .pullquote{font-size:clamp(22px,6vw,32px);padding-left:20px}
+
+  /* SECTION LABELS */
+  .section-label{font-size:8px;letter-spacing:4px}
+  .section-label::before{width:20px}
+
+  /* BUTTONS */
+  .btn-light{padding:16px 32px;font-size:9px}
+  .btn-outline-dark{padding:16px 32px;font-size:9px}
+}
+
+/* Tablet tweaks */
+@media (min-width:769px) and (max-width:1100px) {
+  nav{padding:22px 40px}
+  .hero{padding:0 40px 70px}
+  .editorial-intro,.projects-section,.services-section,.process-section,.contact-strip,.awards-section{padding-left:40px;padding-right:40px}
+  .philosophy{padding-left:40px;padding-right:40px}
+  .philosophy-pillars{grid-template-columns:1fr 1fr}
+  .pillar{border-bottom:1px solid rgba(107,191,78,.1)}
+  .pillar:nth-child(2){border-right:none}
+  .pillar:nth-child(3){border-right:1px solid rgba(107,191,78,.1);border-bottom:none}
+  .pillar:nth-child(4){border-bottom:none}
+  .services-grid{grid-template-columns:1fr 1fr}
+  .awards-list{grid-template-columns:1fr 1fr}
+  .team-grid{grid-template-columns:1fr 1fr}
+  footer{padding:60px 40px 32px}
+  .footer-top{grid-template-columns:1.5fr 1fr}
+  .proj-masonry{columns:2}
+  .about-hero-grid{gap:50px}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a class="logo-mark" href="#" onclick="showPage('home')">FORM<span>+</span>VOID</a>
+  <div class="nav-links" id="navLinks">
+    <a href="#" onclick="showPage('projects');closeMobileNav()">Projects</a>
+    <a href="#" onclick="showPage('about');closeMobileNav()">Studio</a>
+    <a href="#" onclick="showPage('manifesto');closeMobileNav()">Manifesto</a>
+    <a href="#" onclick="showPage('contact');closeMobileNav()" class="nav-cta">Enquire</a>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<!-- MOBILE NAV OVERLAY -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+  <div class="mobile-nav-top">
+    <span class="logo-mark">FORM<span style="color:var(--rust)">+</span>VOID</span>
+    <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  </div>
+  <nav class="mobile-nav-links">
+    <a href="#" onclick="showPage('home');closeMobileNav()">Home</a>
+    <a href="#" onclick="showPage('projects');closeMobileNav()">Projects</a>
+    <a href="#" onclick="showPage('about');closeMobileNav()">Studio</a>
+    <a href="#" onclick="showPage('manifesto');closeMobileNav()">Manifesto</a>
+    <a href="#" onclick="showPage('contact');closeMobileNav()" class="mobile-nav-cta">Enquire</a>
+  </nav>
+  <div class="mobile-nav-footer">
+    <p>701 Brazos St, Austin TX</p>
+    <p>hello@formvoid.com</p>
+    <div style="display:flex;gap:20px;margin-top:24px">
+      <a href="#">IG</a><a href="#">LI</a><a href="#">BE</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOME PAGE ===== -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grain"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content" style="width:100%;display:flex;flex-direction:column">
+      <div class="hero-eyebrow">ARCHITECTURAL SYNDICATE — EST. 2007</div>
+      <h1>WHERE SILENCE<br><em>INHABITS</em><br>STRUCTURE.</h1>
+      <div class="hero-bottom">
+        <div>
+          <p class="hero-desc">We craft environments that transcend function — spaces that breathe, resonate, and endure. Brutalist precision meets biophilic warmth.</p>
+          <div style="display:flex;gap:20px;margin-top:30px;align-items:center">
+            <a href="#" class="btn-light" onclick="showPage('projects')">View Archive</a>
+            <a href="#" style="font-size:11px;letter-spacing:3px;color:var(--warm-grey);text-decoration:none" onclick="showPage('contact')">Start Dialogue →</a>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><span class="stat-num">183</span><div class="stat-label">Projects</div></div>
+          <div class="stat-item"><span class="stat-num">28</span><div class="stat-label">Awards</div></div>
+          <div class="stat-item"><span class="stat-num">17</span><div class="stat-label">Countries</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint">SCROLL</div>
+  </header>
+
+  <!-- MARQUEE -->
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <div class="marquee-item">RESIDENTIAL<span>✦</span></div>
+      <div class="marquee-item">COMMERCIAL<span>✦</span></div>
+      <div class="marquee-item">CIVIC ARCHITECTURE<span>✦</span></div>
+      <div class="marquee-item">INTERIOR DESIGN<span>✦</span></div>
+      <div class="marquee-item">LANDSCAPE<span>✦</span></div>
+      <div class="marquee-item">MASTER PLANNING<span>✦</span></div>
+      <div class="marquee-item">RESIDENTIAL<span>✦</span></div>
+      <div class="marquee-item">COMMERCIAL<span>✦</span></div>
+      <div class="marquee-item">CIVIC ARCHITECTURE<span>✦</span></div>
+      <div class="marquee-item">INTERIOR DESIGN<span>✦</span></div>
+      <div class="marquee-item">LANDSCAPE<span>✦</span></div>
+      <div class="marquee-item">MASTER PLANNING<span>✦</span></div>
+    </div>
+  </div>
+
+  <!-- EDITORIAL INTRO -->
+  <section class="editorial-intro">
+    <div>
+      <span class="editorial-label">STUDIO PHILOSOPHY</span>
+      <h2>The Poetics of<br>Inhabited Space</h2>
+      <p>Architecture is the art of organizing silence. Every structural decision is a choreography of light, shadow, material, and void — each element speaking to the human condition.</p>
+      <p>At FORM + VOID, we pursue what we call "Structural Empathy" — the discipline of designing spaces that respond to how people truly move, feel, and live.</p>
+      <a href="#" class="text-link" onclick="showPage('manifesto')">Read Our Manifesto →</a>
+    </div>
+    <div class="editorial-visual">
+      <img class="editorial-img" src="https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&q=80&w=800" alt="Interior">
+      <div class="editorial-badge">
+        <span>AUSTIN</span>
+        <strong>TX</strong>
+        <span>HQ</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PROJECTS -->
+  <section class="projects-section">
+    <div class="section-header">
+      <div>
+        <div class="section-label" style="margin-bottom:16px">SELECTED WORKS</div>
+        <h2>Current<br><em>Commissions</em></h2>
+      </div>
+      <a href="#" class="btn-light" onclick="showPage('projects')">Full Archive →</a>
+    </div>
+    <div class="projects-grid">
+      <div class="proj-card large">
+        <div class="proj-card-always">01 / RESIDENTIAL</div>
+        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=900" alt="Villa Void">
+        <div class="proj-card-info">
+          <div class="proj-type">Residential</div>
+          <div class="proj-name">Villa Serotina</div>
+          <div class="proj-year">Austin, Texas — 2024</div>
+        </div>
+      </div>
+      <div class="proj-card small">
+        <div class="proj-card-always">02 / COMMERCIAL</div>
+        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=900" alt="Tower">
+        <div class="proj-card-info">
+          <div class="proj-type">Commercial</div>
+          <div class="proj-name">Axis Pavilion</div>
+          <div class="proj-year">Chicago, IL — 2024</div>
+        </div>
+      </div>
+      <div class="proj-card small">
+        <div class="proj-card-always">03 / INTERIOR</div>
+        <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=900" alt="Interior">
+        <div class="proj-card-info">
+          <div class="proj-type">Interior</div>
+          <div class="proj-name">Shadow Studio</div>
+          <div class="proj-year">New York, NY — 2023</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY — 4 PILLARS -->
+  <section class="philosophy">
+    <div class="philosophy-top">
+      <div class="section-label" style="color:var(--warm-grey)">OUR CONVICTION</div>
+      <div style="font-size:11px;letter-spacing:2px;color:var(--warm-grey);text-transform:uppercase">Four Pillars of Practice</div>
+    </div>
+    <div class="philosophy-pillars">
+      <div class="pillar">
+        <div class="pillar-ghost">01</div>
+        <div class="pillar-inner">
+          <span class="pillar-num">01</span>
+          <h3 class="pillar-quote">"We design not rooms, but <em>psychological</em> landscapes."</h3>
+          <p class="pillar-body">Every threshold, every material selection, every angle of incidence is a decision that shapes the occupant's interior world. We take that responsibility seriously.</p>
+          <div class="pillar-tag">Spatial Empathy</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-ghost">02</div>
+        <div class="pillar-inner">
+          <span class="pillar-num">02</span>
+          <h3 class="pillar-quote">"Materials speak. Our job is to let them <em>tell the truth.</em>"</h3>
+          <p class="pillar-body">Concrete poured, timber grown, glass floated. We treat every surface as an honest record of its making — no veneers, no artifice, no material deception of any kind.</p>
+          <div class="pillar-tag">Material Honesty</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-ghost">03</div>
+        <div class="pillar-inner">
+          <span class="pillar-num">03</span>
+          <h3 class="pillar-quote">"A building is the most <em>intimate</em> form of civic art."</h3>
+          <p class="pillar-body">Our practice is built on the belief that the built environment is experienced daily, in both waking and dreaming. That intimacy demands rigor and humility in equal measure.</p>
+          <div class="pillar-tag">Civic Responsibility</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-ghost">04</div>
+        <div class="pillar-inner">
+          <span class="pillar-num">04</span>
+          <h3 class="pillar-quote">"We build for two centuries, not for <em>this decade.</em>"</h3>
+          <p class="pillar-body">Every structural decision passes an ecological audit. Low-carbon materials, adaptive reuse strategies, and passive climate systems are prerequisites — not options.</p>
+          <div class="pillar-tag">Long-View Building</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services-section">
+    <div class="section-header" style="margin-bottom:60px">
+      <div>
+        <div class="section-label" style="color:var(--warm-grey);margin-bottom:16px">CAPABILITIES</div>
+        <h2>What We<br><em>Build</em></h2>
+      </div>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <span class="service-num">01</span>
+        <h4>Architecture</h4>
+        <p>Full-scope architectural design from concept through construction documentation. We specialize in raw concrete, structural glass, and biophilic materiality.</p>
+      </div>
+      <div class="service-card">
+        <span class="service-num">02</span>
+        <h4>Interior Design</h4>
+        <p>Spatial curation that extends the architectural language into every surface, fixture, and threshold. We treat interiors as lived sculpture.</p>
+      </div>
+      <div class="service-card">
+        <span class="service-num">03</span>
+        <h4>Landscape + Site</h4>
+        <p>Site planning and landscape design that treats the ground plane as a continuous surface between building and earth — no boundary between inside and out.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="process-section">
+    <div class="section-label" style="justify-content:center;margin-bottom:20px">HOW WE WORK</div>
+    <h2>Our Process</h2>
+    <p class="sub">A rigorous, collaborative methodology built over two decades</p>
+    <div class="process-steps">
+      <div class="step">
+        <div class="step-dot"><span class="step-num">01</span></div>
+        <h4>Discovery</h4>
+        <p>Deep listening sessions to understand site, client values, and contextual constraints</p>
+      </div>
+      <div class="step">
+        <div class="step-dot"><span class="step-num">02</span></div>
+        <h4>Concept</h4>
+        <p>Schematic explorations that translate intention into spatial and material language</p>
+      </div>
+      <div class="step">
+        <div class="step-dot"><span class="step-num">03</span></div>
+        <h4>Development</h4>
+        <p>Rigorous documentation, material specification, and contractor coordination</p>
+      </div>
+      <div class="step">
+        <div class="step-dot"><span class="step-num">04</span></div>
+        <h4>Realisation</h4>
+        <p>On-site stewardship ensuring the built outcome honors the conceptual vision</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="testimonial-section">
+    <div class="testimonial-inner">
+      <blockquote>"They don't merely design buildings — they compose experiences. Our home has become a dialogue between architecture and landscape that I discover anew each morning."</blockquote>
+      <cite>— MARCUS THIELE, VILLA SEROTINA CLIENT</cite>
+    </div>
+  </section>
+
+  <!-- AWARDS -->
+  <section class="awards-section">
+    <div class="section-header" style="margin-bottom:60px">
+      <div class="section-label" style="margin-bottom:16px">RECOGNITION</div>
+      <h2>Awards &<br><em style="font-family:'Cormorant Garamond';font-style:italic;color:var(--sand)">Distinctions</em></h2>
+    </div>
+    <div class="awards-list">
+      <div class="award-item">
+        <span class="award-year">2024</span>
+        <div class="award-name">AIA Honor Award</div>
+        <div class="award-org">American Institute of Architects</div>
+      </div>
+      <div class="award-item">
+        <span class="award-year">2023</span>
+        <div class="award-name">Design Excellence</div>
+        <div class="award-org">Architectural Digest</div>
+      </div>
+      <div class="award-item">
+        <span class="award-year">2022</span>
+        <div class="award-name">Pritzker Nomination</div>
+        <div class="award-org">Pritzker Architecture Prize</div>
+      </div>
+      <div class="award-item">
+        <span class="award-year">2021</span>
+        <div class="award-name">Sustainable Build Award</div>
+        <div class="award-org">RIBA International</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT STRIP -->
+  <section class="contact-strip">
+    <div>
+      <div class="section-label" style="color:var(--warm-grey);margin-bottom:24px">NEW COMMISSIONS</div>
+      <h2>Let's Begin<br>a <em>Dialogue</em>.</h2>
+      <p style="font-size:14px;color:#666;margin-bottom:40px;line-height:1.8">We are selective with our commissions. We take on projects where ambition, budget, and philosophy align. Tell us your vision.</p>
+      <a href="#" class="btn-outline-dark" onclick="showPage('contact')">Start the Conversation</a>
+    </div>
+    <div class="contact-details">
+      <p><strong>Studio</strong><br>701 Brazos St, Austin, TX 78701</p>
+      <p><strong>Email</strong><br>hello@formvoid.com</p>
+      <p><strong>Phone</strong><br>+1 (512) 555-0192</p>
+      <p><strong>New Business</strong><br>commissions@formvoid.com</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">FORM<span>+</span>VOID</div>
+        <p class="footer-tagline">An architectural syndicate building at the intersection of brutalist precision and biophilic warmth. Based in Austin, operating globally.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Studio</h5>
+        <a href="#" onclick="showPage('about')">About Us</a>
+        <a href="#" onclick="showPage('about')">Our Team</a>
+        <a href="#" onclick="showPage('manifesto')">Manifesto</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Work</h5>
+        <a href="#" onclick="showPage('projects')">All Projects</a>
+        <a href="#" onclick="showPage('projects')">Residential</a>
+        <a href="#" onclick="showPage('projects')">Commercial</a>
+        <a href="#" onclick="showPage('projects')">Interiors</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 FORM + VOID Studio. All rights reserved.</p>
+      <div class="footer-social">
+        <a href="#">IG</a>
+        <a href="#">LI</a>
+        <a href="#">BE</a>
+        <a href="#">PI</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== PROJECTS PAGE ===== -->
+<div class="page" id="page-projects">
+  <div class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-content">
+      <h1>Project<br><em>Archive</em></h1>
+      <p>183 COMPLETED WORKS — 2007 TO PRESENT</p>
+    </div>
+  </div>
+
+  <div class="projects-full">
+    <div class="filter-bar">
+      <button class="filter-btn active">All Work</button>
+      <button class="filter-btn">Residential</button>
+      <button class="filter-btn">Commercial</button>
+      <button class="filter-btn">Interior</button>
+      <button class="filter-btn">Civic</button>
+      <button class="filter-btn">Landscape</button>
+    </div>
+    <div class="proj-masonry">
+      <div class="proj-masonry-item">
+        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800" alt="Villa Serotina">
+        <div class="proj-masonry-info">
+          <div class="proj-type">Residential</div>
+          <h3>Villa Serotina</h3>
+          <p>Austin, Texas — 2024</p>
+        </div>
+      </div>
+      <div class="proj-masonry-item">
+        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800" alt="Axis Pavilion">
+        <div class="proj-masonry-info">
+          <div class="proj-type">Commercial</div>
+          <h3>Axis Pavilion</h3>
+          <p>Chicago, Illinois — 2024</p>
+        </div>
+      </div>
+      <div class="proj-masonry-item">
+        <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&q=80&w=800" alt="The Orchard House">
+        <div class="proj-masonry-info">
+          <div class="proj-type">Residential</div>
+          <h3>The Orchard House</h3>
+          <p>Ojai, California — 2023</p>
+        </div>
+      </div>
+      <div class="proj-masonry-item">
+        <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=800" alt="Shadow Studio">
+        <div class="proj-masonry-info">
+          <div class="proj-type">Interior</div>
+          <h3>Shadow Studio</h3>
+          <p>New York, NY — 2023</p>
+        </div>
+      </div>
+      <div class="proj-masonry-item">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800" alt="Moss Library">
+        <div class="proj-masonry-info">
+          <div class="proj-type">Civic</div>
+          <h3>Moss Library</h3>
+          <p>Portland, Oregon — 2023</p>
+        </div>
+      </div>
+      <div class="proj-masonry-item">
+        <img src="https://images.unsplash.com/photo-1449247709967-d4461a6a6103?auto=format&fit=crop&q=80&w=800" alt="Corten Residence">
+        <div class="proj-masonry-info">
+          <div class="proj-type">Residential</div>
+          <h3>Corten Residence</h3>
+          <p>Santa Fe, NM — 2022</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">FORM<span>+</span>VOID</div>
+        <p class="footer-tagline">An architectural syndicate building at the intersection of brutalist precision and biophilic warmth.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Navigation</h5>
+        <a href="#" onclick="showPage('home')">Home</a>
+        <a href="#" onclick="showPage('about')">Studio</a>
+        <a href="#" onclick="showPage('manifesto')">Manifesto</a>
+        <a href="#" onclick="showPage('contact')">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <a href="#">hello@formvoid.com</a>
+        <a href="#">+1 (512) 555-0192</a>
+        <a href="#">Austin, Texas</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 FORM + VOID Studio. All rights reserved.</p>
+      <div class="footer-social"><a href="#">IG</a><a href="#">LI</a><a href="#">BE</a></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== ABOUT PAGE ===== -->
+<div class="page" id="page-about">
+  <div style="padding-top:100px">
+    <div class="about-hero">
+      <div class="about-hero-grid">
+        <div>
+          <div class="section-label" style="color:var(--warm-grey);margin-bottom:24px">THE STUDIO</div>
+          <h1>Built on<br><em>Conviction</em>.</h1>
+          <p class="lead">Founded in 2007 by Elena Vasquez and Marcus Cole, FORM + VOID is an architectural syndicate committed to the idea that buildings should be felt, not just seen.</p>
+          <p style="font-size:14px;color:#666;line-height:1.9">Over seventeen years, we have completed 183 projects across 17 countries, earning international recognition for our commitment to structural integrity, material honesty, and spatial empathy.</p>
+          <a href="#" class="text-link" style="margin-top:30px" onclick="showPage('contact')">Commission the Studio →</a>
+        </div>
+        <div class="about-img-stack">
+          <img class="about-img-main" src="https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&q=80&w=700" alt="Studio">
+          <img class="about-img-accent" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=500" alt="Detail">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="team-section">
+    <div class="section-label" style="justify-content:center;margin-bottom:20px">THE PEOPLE</div>
+    <h2>Our <em style="font-family:'Cormorant Garamond';font-style:italic;color:var(--sand)">Team</em></h2>
+    <p class="sub">A collective of architects, artists, and thinkers</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600" alt="Elena Vasquez">
+        <div class="team-card-info">
+          <div class="team-card-name">Elena Vasquez</div>
+          <div class="team-card-title">Founding Principal</div>
+        </div>
+      </div>
+      <div class="team-card">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600" alt="Marcus Cole">
+        <div class="team-card-info">
+          <div class="team-card-name">Marcus Cole</div>
+          <div class="team-card-title">Design Principal</div>
+        </div>
+      </div>
+      <div class="team-card">
+        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600" alt="Yuki Tanaka">
+        <div class="team-card-info">
+          <div class="team-card-name">Yuki Tanaka</div>
+          <div class="team-card-title">Director of Interiors</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="values-section">
+    <div class="values-label">Our<br><em>Values</em></div>
+    <div class="values-list">
+      <div class="value-item">
+        <span class="value-num">01</span>
+        <div>
+          <h4>Material Honesty</h4>
+          <p>We use materials as they are meant to be used — concrete poured, timber grown, glass floated. No veneers. No deception. Every surface tells the truth of its making.</p>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-num">02</span>
+        <div>
+          <h4>Structural Empathy</h4>
+          <p>We design by inhabiting the space imaginatively before the first drawing. What will the morning light do? How will the sound travel? What does this threshold mean?</p>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-num">03</span>
+        <div>
+          <h4>Ecological Responsibility</h4>
+          <p>Every project must pass our ecological audit. We design for a 200-year life span with minimal operational energy and maximum structural adaptability.</p>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-num">04</span>
+        <div>
+          <h4>Long-View Collaboration</h4>
+          <p>We build relationships as carefully as we build buildings. Many of our clients return for second and third projects. That continuity deepens the work.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">FORM<span>+</span>VOID</div>
+        <p class="footer-tagline">An architectural syndicate building at the intersection of brutalist precision and biophilic warmth.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Navigation</h5>
+        <a href="#" onclick="showPage('home')">Home</a>
+        <a href="#" onclick="showPage('projects')">Projects</a>
+        <a href="#" onclick="showPage('manifesto')">Manifesto</a>
+        <a href="#" onclick="showPage('contact')">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <a href="#">hello@formvoid.com</a>
+        <a href="#">+1 (512) 555-0192</a>
+        <a href="#">Austin, Texas</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 FORM + VOID Studio. All rights reserved.</p>
+      <div class="footer-social"><a href="#">IG</a><a href="#">LI</a><a href="#">BE</a></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== MANIFESTO PAGE ===== -->
+<div class="page" id="page-manifesto">
+  <div style="padding-top:100px;background:var(--ink)">
+    <div class="manifesto-page">
+      <span class="eyebrow">FORM + VOID — MANIFESTO</span>
+      <h1>The<br>Case for<br><em>Silence.</em></h1>
+      <div class="manifesto-body">
+        <p>We live in an age of <span class="accent">architectural noise</span>. Buildings compete for attention like billboards — each one louder, stranger, more adorned than the last. We believe this is a misreading of what architecture is for.</p>
+        
+        <div class="pullquote">"The greatest buildings are those that make you feel more completely yourself."</div>
+        
+        <p>Architecture's first duty is not to impress. It is to <span class="accent">shelter</span> — in the deepest sense of that word. To shelter the body, yes. But also the mind, the spirit, the private self that needs respite from the relentless demand of the modern world.</p>
+        
+        <div class="manifesto-divider"></div>
+        
+        <p>We practice what we call <span class="accent">Structural Empathy</span>: the discipline of designing from the inside out, beginning always with the question of how a space will be lived before we ask how it will be seen. This is not sentimentalism. It is precision of a different order.</p>
+        
+        <p>We believe in the intelligence of materials. Concrete cast in place holds the memory of its forming — the grain of the wood, the seams of the boards. Glass floated over molten tin achieves a clarity that no subsequent treatment can replicate. Timber, properly detailed, breathes with the seasons. We use materials as they wish to be used, and in doing so, we align ourselves with forces larger than our own ambitions.</p>
+        
+        <div class="pullquote">"To build well is to listen — to the site, the client, the materials, the light."</div>
+        
+        <p>We are not minimalists, though our work is often quiet. We are not maximalists, though our spaces are often rich. We are <span class="accent">structuralists</span> — people who believe that the right organization of space, material, and light can produce something close to the experience of grace.</p>
+        
+        <div class="manifesto-divider"></div>
+        
+        <p>This is what we build toward. Not awards. Not accolades. Not the appearance of innovation. We build toward the moment when someone walks through a door we have designed and, without quite knowing why, feels that they have arrived somewhere that has been waiting for them.</p>
+        
+        <p style="font-family:'Bebas Neue',sans-serif;letter-spacing:4px;font-size:16px;color:var(--rust)">— ELENA VASQUEZ + MARCUS COLE, FORM + VOID, 2024</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">FORM<span>+</span>VOID</div>
+        <p class="footer-tagline">An architectural syndicate building at the intersection of brutalist precision and biophilic warmth.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Navigation</h5>
+        <a href="#" onclick="showPage('home')">Home</a>
+        <a href="#" onclick="showPage('projects')">Projects</a>
+        <a href="#" onclick="showPage('about')">Studio</a>
+        <a href="#" onclick="showPage('contact')">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <a href="#">hello@formvoid.com</a>
+        <a href="#">+1 (512) 555-0192</a>
+        <a href="#">Austin, Texas</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 FORM + VOID Studio. All rights reserved.</p>
+      <div class="footer-social"><a href="#">IG</a><a href="#">LI</a><a href="#">BE</a></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== CONTACT PAGE ===== -->
+<div class="page" id="page-contact">
+  <div style="padding-top:80px">
+    <div class="contact-page">
+      <div>
+        <div class="section-label" style="color:var(--warm-grey);margin-bottom:30px">NEW COMMISSIONS</div>
+        <h1>Begin a<br><em>Dialogue.</em></h1>
+        <p class="lead">We are selective with our commissions — we seek projects where ambition, resources, and philosophy align. Tell us about your vision.</p>
+        <div class="contact-info-block">
+          <h5>Studio Address</h5>
+          <p>701 Brazos Street<br>Austin, Texas 78701</p>
+        </div>
+        <div class="contact-info-block">
+          <h5>General Enquiries</h5>
+          <p>hello@formvoid.com</p>
+        </div>
+        <div class="contact-info-block">
+          <h5>New Commissions</h5>
+          <p>commissions@formvoid.com</p>
+        </div>
+        <div class="contact-info-block">
+          <h5>Phone</h5>
+          <p>+1 (512) 555-0192</p>
+        </div>
+        <div class="contact-info-block">
+          <h5>Studio Hours</h5>
+          <p>Monday – Friday: 9AM – 6PM CST</p>
+        </div>
+      </div>
+      <div>
+        <div class="contact-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" placeholder="Elena">
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" placeholder="Vasquez">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="hello@email.com">
+          </div>
+          <div class="form-group">
+            <label>Project Type</label>
+            <select>
+              <option value="">Select a discipline</option>
+              <option>Residential Architecture</option>
+              <option>Commercial Architecture</option>
+              <option>Interior Design</option>
+              <option>Landscape + Site</option>
+              <option>Master Planning</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Approximate Budget</label>
+            <select>
+              <option value="">Select a range</option>
+              <option>$500k – $1M</option>
+              <option>$1M – $5M</option>
+              <option>$5M – $20M</option>
+              <option>$20M+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tell us about your vision</label>
+            <textarea placeholder="Describe your project, site, timeline, and what you're hoping to achieve..."></textarea>
+          </div>
+          <button class="btn-submit">Send Enquiry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="background:var(--cream);border-top:1px solid rgba(0,0,0,.08)">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo" style="color:var(--ink)">FORM<span>+</span>VOID</div>
+        <p class="footer-tagline" style="color:#888">An architectural syndicate building at the intersection of brutalist precision and biophilic warmth.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Navigation</h5>
+        <a href="#" onclick="showPage('home')" style="color:#666">Home</a>
+        <a href="#" onclick="showPage('projects')" style="color:#666">Projects</a>
+        <a href="#" onclick="showPage('about')" style="color:#666">Studio</a>
+        <a href="#" onclick="showPage('manifesto')" style="color:#666">Manifesto</a>
+      </div>
+      <div class="footer-col">
+        <h5>Social</h5>
+        <a href="#" style="color:#666">Instagram</a>
+        <a href="#" style="color:#666">LinkedIn</a>
+        <a href="#" style="color:#666">Behance</a>
+      </div>
+    </div>
+    <div class="footer-bottom" style="border-color:rgba(0,0,0,.08)">
+      <p style="color:#aaa">© 2024 FORM + VOID Studio. All rights reserved.</p>
+      <div class="footer-social"><a href="#">IG</a><a href="#">LI</a><a href="#">BE</a></div>
+    </div>
+  </footer>
+</div>
+
+<script>
+// Custom cursor — desktop only
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+const isTouchDevice = () => window.matchMedia('(hover:none)').matches;
+document.addEventListener('mousemove', e => {
+  if(isTouchDevice()) return;
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+  setTimeout(() => {
+    ring.style.left = e.clientX + 'px';
+    ring.style.top = e.clientY + 'px';
+  }, 80);
+});
+document.querySelectorAll('a,button,.proj-card,.proj-masonry-item').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.transform = 'translate(-50%,-50%) scale(2.5)'; ring.style.transform = 'translate(-50%,-50%) scale(1.5)'; });
+  el.addEventListener('mouseleave', () => { cursor.style.transform = 'translate(-50%,-50%) scale(1)'; ring.style.transform = 'translate(-50%,-50%) scale(1)'; });
+});
+
+// Scroll nav
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Page switching
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Mobile nav
+function toggleMobileNav() {
+  const open = document.getElementById('mobileNavDrawer').classList.toggle('open');
+  document.getElementById('mobileNavOverlay').classList.toggle('open', open);
+  document.getElementById('hamburger').classList.toggle('open', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeMobileNav() {
+  document.getElementById('mobileNavDrawer').classList.remove('open');
+  document.getElementById('mobileNavOverlay').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>
